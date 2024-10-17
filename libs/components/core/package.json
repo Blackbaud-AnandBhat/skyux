@@ -21,7 +21,8 @@
     "@angular/core": "^18.2.8",
     "@angular/platform-browser": "^18.2.8",
     "@angular/router": "^18.2.8",
-    "@skyux/i18n": "0.0.0-PLACEHOLDER"
+    "@skyux/i18n": "0.0.0-PLACEHOLDER",
+    "@skyux/theme": "0.0.0-PLACEHOLDER"
   },
   "dependencies": {
     "tslib": "^2.6.3"

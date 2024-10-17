@@ -1,3 +1,5 @@
+import { SkyAppViewportService } from '@skyux/theme';
+
 import { SkyViewkeeperBoundaryInfo } from './viewkeeper-boundary-info';
 import { SkyViewkeeperFixedStyles } from './viewkeeper-fixed-styles';
 import { SkyViewkeeperOffset } from './viewkeeper-offset';
@@ -115,8 +117,6 @@ export class SkyViewkeeper {
 
   #verticalOffsetEl: HTMLElement | undefined;
 
-  #viewportMarginTop = 0;
-
   #currentElFixedLeft: number | undefined;
 
   #currentElFixedTop: number | undefined;
@@ -137,8 +137,15 @@ export class SkyViewkeeper {
 
   #spacerResizeObserver: ResizeObserver | undefined;
 
-  constructor(options: SkyViewkeeperOptions) {
+  #viewportService: SkyAppViewportService;
+
+  constructor(
+    viewportService: SkyAppViewportService,
+    options: SkyViewkeeperOptions,
+  ) {
     options = options || /* istanbul ignore next */ {};
+
+    this.#viewportService = viewportService;
 
     this.#el = options.el;
     this.#boundaryEl = options.boundaryEl;
@@ -159,11 +166,6 @@ export class SkyViewkeeper {
     this.#scrollableHost = options.scrollableHost;
     this.#verticalOffset = options.verticalOffset || 0;
     this.#verticalOffsetEl = options.verticalOffsetEl;
-
-    // Only set viewport margin if the scrollable host is undefined.
-    if (!this.#scrollableHost) {
-      this.#viewportMarginTop = options.viewportMarginTop ?? 0;
-    }
 
     this.#syncElPositionHandler = (): void =>
       this.syncElPosition(el, boundaryEl);
@@ -195,11 +197,21 @@ export class SkyViewkeeper {
     const boundaryInfo = this.#getBoundaryInfo(el, boundaryEl);
     const fixedStyles = this.#getFixedStyles(boundaryInfo, verticalOffset);
 
-    const doFixEl = this.#shouldFixEl(el, boundaryInfo, verticalOffset);
+    // Only set viewport margin if the scrollable host is undefined.
+    const viewportMarginTop = this.#scrollableHost
+      ? 0
+      : this.#viewportService.reservedSpaces.top;
+
+    const doFixEl = this.#shouldFixEl(
+      el,
+      boundaryInfo,
+      verticalOffset,
+      viewportMarginTop,
+    );
 
     if (this.#needsUpdating(doFixEl, fixedStyles)) {
       if (doFixEl) {
-        this.#fixEl(el, boundaryInfo, fixedStyles);
+        this.#fixEl(el, boundaryInfo, fixedStyles, viewportMarginTop);
       } else {
         this.#unfixEl(el);
       }
@@ -294,6 +306,7 @@ export class SkyViewkeeper {
     el: HTMLElement,
     boundaryInfo: SkyViewkeeperBoundaryInfo,
     verticalOffset: number,
+    viewportMarginTop: number,
   ): boolean {
     let anchorTop: number;
 
@@ -304,8 +317,7 @@ export class SkyViewkeeper {
     }
 
     const doFixEl =
-      boundaryInfo.scrollTop + verticalOffset + this.#viewportMarginTop >
-      anchorTop;
+      boundaryInfo.scrollTop + verticalOffset + viewportMarginTop > anchorTop;
 
     return doFixEl;
   }
@@ -369,6 +381,7 @@ export class SkyViewkeeper {
     el: HTMLElement,
     boundaryInfo: SkyViewkeeperBoundaryInfo,
     fixedStyles: SkyViewkeeperFixedStyles,
+    viewportMarginTop: number,
   ): void {
     /* istanbul ignore else */
     /* sanity check */
@@ -412,7 +425,7 @@ export class SkyViewkeeper {
       fixedStyles.elFixedLeft,
       fixedStyles.elFixedTop,
       width,
-      this.#viewportMarginTop,
+      viewportMarginTop,
       fixedStyles.elClipTop,
       fixedStyles.elClipLeft,
     );

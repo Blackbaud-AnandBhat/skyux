@@ -1,4 +1,5 @@
 import { Injectable, Optional } from '@angular/core';
+import { SkyAppViewportService } from '@skyux/theme';
 
 import { SkyViewkeeper } from './viewkeeper';
 import { SkyViewkeeperHostOptions } from './viewkeeper-host-options';
@@ -11,10 +12,15 @@ import { SkyViewkeeperOptions } from './viewkeeper-options';
   providedIn: 'root',
 })
 export class SkyViewkeeperService {
+  #viewportService: SkyAppViewportService;
   #hostOptions: SkyViewkeeperHostOptions | undefined;
 
-  constructor(@Optional() hostOptions?: SkyViewkeeperHostOptions) {
+  constructor(
+    viewportService: SkyAppViewportService,
+    @Optional() hostOptions?: SkyViewkeeperHostOptions,
+  ) {
     this.#hostOptions = hostOptions;
+    this.#viewportService = viewportService;
   }
 
   /**
@@ -24,7 +30,7 @@ export class SkyViewkeeperService {
   public create(options: SkyViewkeeperOptions): SkyViewkeeper {
     options = Object.assign({}, this.#hostOptions || {}, options);
 
-    return new SkyViewkeeper(options);
+    return new SkyViewkeeper(this.#viewportService, options);
   }
 
   /**

@@ -20,6 +20,14 @@ export class SkyAppViewportService {
    * and styles are ready.
    */
   public visible = new ReplaySubject<boolean>(1);
+  public reservedSpaces: {
+    [key in SkyAppViewportReservedPositionType]: number;
+  } = {
+    bottom: 0,
+    left: 0,
+    right: 0,
+    top: 0,
+  };
 
   #reserveItems = new Map<string, SkyAppViewportReserveArgs>();
   #document: Document;
@@ -68,5 +76,7 @@ export class SkyAppViewportService {
         size + 'px',
       );
     }
+
+    this.reservedSpaces = reservedSpaces;
   }
 }

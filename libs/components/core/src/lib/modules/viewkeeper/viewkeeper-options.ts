@@ -44,4 +44,9 @@ export interface SkyViewkeeperOptions {
    * Reserved space in pixels at the top of the viewport.
    */
   viewportMarginTop?: number;
+
+  /**
+   * Determine viewport margin top dynamically when scrolling based on current SkyAppViewportService reserved space
+   */
+  dynamicViewportMarginTop?: boolean;
 }
